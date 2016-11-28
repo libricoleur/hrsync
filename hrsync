@@ -37,9 +37,39 @@ then
 	rsync -a --delete --link-dest="$Source" --exclude="/$Shadow" "$Source"/ "$Source/$Shadow"
 fi
 
-# do real syncronization
-rsync -axXhHv --stats --no-inc-recursive --numeric-ids --delete --delete-after "$Source"/ "$Target"
+# Create the target if needed
+if [ ! -e "$Target" ]
+then
+	mkdir "$Target"
+	# make dummy symlink
+	ln -s "$Target" "$Target/latest"
+fi
 
+# check if the target directory looks like what we expect
+if [ ! -h "$Target/latest" ] && [ ! -h "$Target/old" ]
+then
+	echo "Please prepare your target directory."
+	echo "See the README file."
+
+	exit 1
+fi
+
+# change the links for the run
+if [ ! -e "$Target/old" ]
+then
+	mv "$Target/latest" "$Target/old"
+fi
+
+# create current link
+if [ ! -e "$Target/current" ]
+then
+	current=`date "+%Y-%m-%dT%H:%M:%S"`
+	mkdir "$Target/$current"
+	ln -rs "$Target/$current" "$Target/current"
+fi
+
+# do real syncronization
+rsync -axXhHv --link-dest="$Target/old" --stats --no-inc-recursive --numeric-ids --delete --delete-after "$Source"/ "$Target/current"
 status=$?
 
 if [ $status -eq 0 ]
@@ -48,7 +78,11 @@ then
 	rsync -a --delete --link-dest="$Source" --exclude="/$Shadow" "$Source"/ "$Source/$Shadow"
 
 	#update target shadow directory
-	rsync -a --delete --link-dest="$Target" --exclude="/$Shadow" "$Target/" "$Target/$Shadow"
+	rsync -a --delete --link-dest="$Target/current" --exclude="/$Shadow" "$Target/current/" "$Target/current/$Shadow"
+
+	# put the links back in place
+	rm "$Target/old"
+	mv "$Target/current" "$Target/latest"
 fi
 
 exit $status

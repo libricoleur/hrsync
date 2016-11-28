@@ -1,12 +1,16 @@
 hrsync
 ======
 
-A shell script showing how to backup a directory with rsync detecting moved and renamed files.
+A shell script showing how to backup a directory with rsync detecting moved and renamed files while also keeping snapshots of your previous backups.
 
-Rsync is a great tool but lack detection of moved and renamed files, with this simple script is possible to avoid transfer of files which were only moved around or renamed.
+Rsync is a great tool but it lacks detection of moved and renamed files. With this simple script it is possible to avoid transfer of files which were only moved around or renamed. As an added bonus, your previous backups will be kept as snapshots.
 
-The basic idea is to create a tree (inside source directory) of hard linked files representing the original filesystem structure of the source itself, letting rsync recostructing links in the initial phase of the transfer.
-After the initial run you will find a new directory (.rsync_shadow) inside source and target directories, please don't touch the tree inside if you want that the script will continue working. 
+The basic idea is to create a tree (inside source directory) of hard linked files representing the original filesystem structure of the source itself, letting rsync reconstructing links in the initial phase of the transfer.
+After the initial run you will find a new directory (.rsync_shadow) inside source and target directories. Please don't touch the trees inside if you want the script to continue working.
+
+For every backup you make, a snapshot directory containing your tree will be created. A symbolic link named 'latest' will point to the latest snapshot. It is safe to delete any older snapshot whenever you want to free up space.
+
+Forked from https://github.com/dparoli/hrsync.
 
 Credits due to this brilliant article: [Detecting File Moves & Renames with Rsync](http://lincolnloop.com/blog/detecting-file-moves-renames-rsync/).
 
@@ -24,6 +28,8 @@ Requirements
 
 Usage
 -------
+
+If your target directory already contains a copy of your documents, please move it to a subdirectory (eg. 'origin') and make a symbolic link named 'latest' pointing to it.
 
 Run the script with source and target directories as arguments:
 
