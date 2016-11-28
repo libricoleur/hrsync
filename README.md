@@ -17,27 +17,20 @@ I provide only this README as documentation. If you want to know more just look 
 Requirements
 ------------
 
-* rsync >= 3.0 (on remote host also if you use remote target)
+* rsync >= 3.0
 * filesystem with support for hard links on both sides
 * source and target directory should be on different devices
-* source on local filesystem and optionally target on remote (via ssh)
+* source on local filesystem and optionally target on remote (mounted locally)
 
 Usage
 -------
 
-1) Both source and target on local filesystem: run the script with source and target directories as arguments:
+Run the script with source and target directories as arguments:
 
 ```sh
 cd <dir>
 chmod +x ./hrsync
 ./hrsync /home/user/Documents /media/user/external/Documents
-```
-2) Source on local filesystem and target on remote host (via ssh): run the script with source, target and remote host arguments:
-
-```sh
-cd <dir>
-chmod +x ./hrsync
-./hrsync /home/user/Documents /root/Documents root@example.com
 ```
 
 Do your work on the source directory: add, delete and move files, then rerun the script. 

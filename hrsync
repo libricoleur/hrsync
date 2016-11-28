@@ -11,7 +11,6 @@
 
 Source="${1%/}"
 Target="${2%/}"
-TargetHost=$3
 
 # ------------------------------------------------------------
 # Name of shadow directory
@@ -24,10 +23,8 @@ if [ -z "$2" ]
 then
 	echo "Usage:"
 	echo "	hrsync source target"
-	echo "	hrsync source target remoteHost"
 	echo "Example:"
 	echo "	hrsync /home/user/Documents /mnt/external/Documents"
-	echo "	hrsync /home/user/Documents /root/Documents root@example.com"
 	echo "Please see the README file"
 
 	exit 0
@@ -41,14 +38,7 @@ then
 fi
 
 # do real syncronization
-if [ -z "$3" ]
-then
-	# local version
-	rsync -axXhHv --stats --no-inc-recursive --numeric-ids --delete --delete-after "$Source"/ "$Target"
-else
-	# remote version
-	rsync -axXhHv --stats --no-inc-recursive --numeric-ids --delete --delete-after "$Source"/ $TargetHost:"$Target"
-fi
+rsync -axXhHv --stats --no-inc-recursive --numeric-ids --delete --delete-after "$Source"/ "$Target"
 
 status=$?
 
@@ -58,14 +48,7 @@ then
 	rsync -a --delete --link-dest="$Source" --exclude="/$Shadow" "$Source"/ "$Source/$Shadow"
 
 	#update target shadow directory
-	if [ -z "$3" ]
-	then
-		# local version
-		rsync -a --delete --link-dest="$Target" --exclude="/$Shadow" "$Target/" "$Target/$Shadow"
-	else
-		# remote version
-		ssh $TargetHost "rsync -a --delete --link-dest=$Target --exclude=/$Shadow $Target/ $Target/$Shadow"
-	fi
+	rsync -a --delete --link-dest="$Target" --exclude="/$Shadow" "$Target/" "$Target/$Shadow"
 fi
 
 exit $status
